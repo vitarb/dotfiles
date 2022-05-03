@@ -29,11 +29,18 @@ font pango:monospace 8
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet
+# Run VPN client
+exec --no-startup-id /opt/piavpn/bin/pia-client 
+# Set background image
+exec_always --no-startup-id feh --bg-scale $HOME/.config/i3/background.jpg
+# Language switcher
+# Read more at https://github.com/zen-tools/gxkb
+exec_always --no-startup-id /usr/bin/gxkb
 
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && $refresh_i3status
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && $refresh_i3status
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
 bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
 
@@ -62,9 +69,8 @@ bindsym $mod+m exec alacritty
 bindsym $mod+Delete kill
 
 # start dmenu (a program launcher)
-#bindsym $mod+d exec --no-startup-id i3-dmenu-desktop -dmenu="dmenu -i -fn 'Ubuntu Mono:bold:pixelsize=24' -nb '#fdf6e3' -nf '#586c75' -sf '#fdf6e3' -sb '#b58900'"
-bindsym $mod+d exec --no-startup-id i3-dmenu-desktop -dmenu="dmenu -i -fn 'Ubuntu Mono:bold:pixelsize=24' -nb '#233142' -nf '#E3E3E3' -sf '#233142' -sb '#F95959'"
-bindsym $mod+comma exec --no-startup-id i3-dmenu-desktop -dmenu="dmenu -i -fn 'Ubuntu Mono:bold:pixelsize=24' -nb '#233142' -nf '#E3E3E3' -sf '#233142' -sb '#F95959'"
+bindsym $mod+d exec --no-startup-id i3-dmenu-desktop -dmenu="dmenu -i -fn 'monospace:bold:pixelsize=16' -nb '#233142' -nf '#E3E3E3' -sf '#233142' -sb '#F95959'"
+bindsym $mod+comma exec --no-startup-id i3-dmenu-desktop -dmenu="dmenu -i -fn 'monospace:bold:pixelsize=16' -nb '#233142' -nf '#E3E3E3' -sf '#233142' -sb '#F95959'"
 
 # lock
 # exec --no-startup-id xautolock -time 10 -locker "/usr/bin/i3lock -d -c 000000"
@@ -128,7 +134,7 @@ bindsym $mod+c focus child
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
-set $ws1 "1: web"
+set $ws1 "1"
 set $ws2 "2"
 set $ws3 "3"
 set $ws4 "4"
@@ -186,7 +192,7 @@ bindsym $mod+s mode "resize"
 # finds out, if available)
 bar {
         status_command i3status -c ~/.config/i3/i3bar.conf
-	font pango:Ubuntu Mono 16
+	font pango:monospace 12
 	colors {
 	    background #233142
 	    statusline #E3E3E3
@@ -202,8 +208,11 @@ bar {
 
 for_window [class="Gnome-calculator"] floating enable
 assign [class="Firefox"] $ws1
-assign [class="Slack"] $ws4
+assign [class="firefox"] $ws1
 assign [class="Code"] $ws3
+assign [class="Slack"] $ws4
+assign [class="Lutris"] $ws4
+assign [class="Battle.net"] $ws4
 
 # Remove title bars from all windows in normal mode.
 for_window [class="^.*"] border pixel 1
