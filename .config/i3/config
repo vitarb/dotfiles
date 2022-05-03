@@ -35,7 +35,7 @@ exec --no-startup-id /opt/piavpn/bin/pia-client
 exec_always --no-startup-id feh --bg-scale $HOME/.config/i3/background.jpg
 # Language switcher
 # Read more at https://github.com/zen-tools/gxkb
-exec_always --no-startup-id /usr/bin/gxkb
+exec_always --no-startup-id "pkill gxkb; /usr/bin/gxkb"
 
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
@@ -50,7 +50,7 @@ bindsym --release Shift+Print exec gnome-screenshot -a
 bindsym Mod1+Tab workspace next
 bindsym Mod1+Shift+Tab workspace prev
 
-exec_always --no-startup-id autorandr --change && feh --bg-scale --no-fehbg "$HOME/Pictures/wallpapers/island.jpg"
+exec_always --no-startup-id autorandr --change && feh --bg-scale --no-fehbg "$HOME/.config/i3/background.jpg"
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
