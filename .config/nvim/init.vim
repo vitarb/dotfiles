@@ -1,6 +1,21 @@
 " Fish doesn't play all that well with others
 set shell=/bin/bash
-let mapleader = "'"
+let mapleader = "\'"
+
+" Map F keys, press C-v and corresponding F key in your terminal to ensure
+" that mappings are correct.
+set <F1>=<F1>
+set <F2>=<F2>
+set <F3>=<F3>
+set <F4>=<F4>
+set <F5>=<F5>
+set <F6>=<F6>
+set <F7>=<F7>
+set <F8>=<F8>
+set <F9>=<F9>
+set <F10>=<F10>
+set <F11>=<F11>
+set <F12>=<F12>
 
 " =============================================================================
 " # PLUGINS
@@ -8,7 +23,6 @@ let mapleader = "'"
 " Load vundle
 set nocompatible
 filetype off
-set rtp+=~/dev/others/base16/templates/vim/
 call plug#begin()
 
 " Load plugins
@@ -17,12 +31,8 @@ Plug 'ciaranm/securemodelines'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'justinmk/vim-sneak'
 
-" Color scheme
-Plug 'chriskempson/base16-vim'
-
 " GUI enhancements
 Plug 'itchyny/lightline.vim'
-Plug 'machakann/vim-highlightedyank'
 Plug 'andymass/vim-matchup'
 
 " Fuzzy finder
@@ -52,14 +62,27 @@ Plug 'rhysd/vim-clang-format'
 Plug 'dag/vim-fish'
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
+Plug 'morhetz/gruvbox'
+
+" Sudo write
+Plug 'lambdalisue/suda.vim'
+" Project tree
+Plug 'preservim/nerdtree'
+" Git integration
+Plug 'airblade/vim-gitgutter'
+Plug 'tpope/vim-fugitive'
 
 call plug#end()
 
 if has('nvim')
     set guicursor=n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor
     set inccommand=nosplit
-    noremap <C-q> :confirm qall<CR>
+    noremap <C-x> :confirm qall<CR>
 end
+
+"set background=light
+set background=dark
+autocmd vimenter * ++nested colorscheme gruvbox
 
 " deal with colors
 if !has('gui_running')
@@ -69,18 +92,14 @@ if (match($TERM, "-256color") != -1) && (match($TERM, "screen-256color") == -1)
   " screen does not (yet) support truecolor
   set termguicolors
 endif
-set background=dark
-let base16colorspace=256
-let g:base16_shell_path="~/dev/others/base16/templates/shell/scripts/"
-colorscheme base16-gruvbox-dark-hard
 syntax on
 hi Normal ctermbg=NONE
 
 " Customize the highlight a bit.
 " Make comments more prominent -- they are important.
-call Base16hi("Comment", g:base16_gui09, "", g:base16_cterm09, "", "", "")
+" call Base16hi("Comment", g:base16_gui09, "", g:base16_cterm09, "", "", "")
 " Make it clearly visible which argument we're at.
-call Base16hi("LspSignatureActiveParameter", g:base16_gui05, g:base16_gui03, g:base16_cterm05, g:base16_cterm03, "bold", "")
+" call Base16hi("LspSignatureActiveParameter", g:base16_gui05, g:base16_gui03, g:base16_cterm05, g:base16_cterm03, "bold", "")
 " Would be nice to customize the highlighting of warnings and the like to make
 " them less glaring. But alas
 " https://github.com/nvim-lua/lsp_extensions.nvim/issues/21
@@ -98,10 +117,13 @@ cmp.setup({
       vim.fn["vsnip#anonymous"](args.body)
     end,
   },
-  mapping = {
-    -- Tab immediately completes. C-n/C-p to select.
-    ['<Tab>'] = cmp.mapping.confirm({ select = true })
-  },
+  mapping = cmp.mapping.preset.insert({
+    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.abort(),
+    ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+  }),
   sources = cmp.config.sources({
     -- TODO: currently snippets from lsp end up getting prioritized -- stop that!
     { name = 'nvim_lsp' },
@@ -125,27 +147,31 @@ local on_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
 
-  -- Enable completion triggered by <c-x><c-o>
+  --Enable completion triggered by <c-x><c-o>
   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 
   -- Mappings.
   local opts = { noremap=true, silent=true }
 
   -- See `:help vim.lsp.*` for documentation on any of the below functions
-  buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-  buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  buf_set_keymap('n', '<leader>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  buf_set_keymap('n', '<f6>', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  buf_set_keymap('n', '<leader>a', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  buf_set_keymap('n', '<leader>r', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  buf_set_keymap('n', '<leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
-  buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
-  buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-  buf_set_keymap('n', '<leader>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-  buf_set_keymap("n", '<leader>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+  buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+  buf_set_keymap('n', '<C-B>', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+  buf_set_keymap('n', '<leader>i', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  buf_set_keymap('n', '<C-M-I>', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  buf_set_keymap('n', '<C-M-B>', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  buf_set_keymap('n', '<F7>', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  buf_set_keymap('n', '<C-q>', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
+  buf_set_keymap('n', '<C-p>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  buf_set_keymap('n', '<leader>d', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  buf_set_keymap('n', '<C-r>', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  buf_set_keymap('n', '<F6>', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  buf_set_keymap('n', '<C-space>', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  buf_set_keymap('n', '<M-CR>', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  buf_set_keymap('n', '<C-M-l>', '<cmd>lua vim.lsp.buf.format()<CR>', opts)
+  -- buf_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+  -- buf_set_keymap('n', '<C-k>', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+  -- buf_set_keymap('n', '<C-j>', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+  -- buf_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.set_loclist()<CR>', opts)
 
   -- Get signatures (and _only_ signatures) when in argument lists.
   require "lsp_signature".on_attach({
@@ -156,7 +182,7 @@ local on_attach = function(client, bufnr)
   })
 end
 
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
 lspconfig.rust_analyzer.setup {
   on_attach = on_attach,
   flags = {
@@ -176,19 +202,6 @@ lspconfig.rust_analyzer.setup {
   },
   capabilities = capabilities,
 }
-lspconfig.gopls.setup {
-    on_attach = on_attach,
-    cmd = {"gopls", "serve"},
-    settings = {
-      gopls = {
-        analyses = {
-          unusedparams = true,
-        },
-        staticcheck = true,
-      },
-    },
-}
-
 
 vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
   vim.lsp.diagnostic.on_publish_diagnostics, {
@@ -254,16 +267,24 @@ let g:latex_fold_envs = 0
 let g:latex_fold_sections = []
 
 " Open hotkeys
-map <C-p> :Files<CR>
-nmap <leader>; :Buffers<CR>
+map <C-n> :Files<CR>
+nmap <C-e> :Buffers<CR>
+
+" Rust
+nnoremap <C-A-F> :RustFmt<CR>
 
 " Quick-save
-nmap <leader>w :w<CR>
+nmap <C-s> :w<CR>
+nmap <leader>s :SudaWrite<CR>
 
 " Don't confirm .lvimrc
 let g:localvimrc_ask = 0
 
 " rust
+nnoremap <leader>rt :RustTest<CR>
+nnoremap <leader>rr :RustRun<CR>
+nnoremap <leader>gt :r ~/.config/nvim/templates/test.rs<CR>
+
 let g:rustfmt_autosave = 1
 let g:rustfmt_emit_files = 1
 let g:rustfmt_fail_silently = 0
@@ -290,9 +311,6 @@ let g:go_bin_path = expand("~/dev/go/bin")
 " # Editor settings
 " =============================================================================
 filetype plugin indent on
-set clipboard+=unnamedplus
-highlight clear SignColumn
-highlight clear LineNr
 set autoindent
 set timeoutlen=300 " http://stackoverflow.com/questions/2158516/delay-before-o-opens-a-new-line
 set encoding=utf-8
@@ -305,9 +323,6 @@ let g:sneak#s_next = 1
 let g:vim_markdown_new_list_item_indent = 0
 let g:vim_markdown_auto_insert_bullets = 0
 let g:vim_markdown_frontmatter = 1
-set printfont=:h10
-set printencoding=utf-8
-set printoptions=paper:letter
 " Always draw sign column. Prevent buffer moving when adding/deleting sign.
 set signcolumn=yes
 
@@ -380,40 +395,33 @@ set diffopt+=indent-heuristic
 set showcmd " Show (partial) command in status line.
 set mouse=a " Enable mouse usage (all modes) in terminals
 set shortmess+=c " don't give |ins-completion-menu| messages.
+au TextYankPost * silent! lua vim.highlight.on_yank() " Highlight yank
 
 " Show those damn hidden characters
 " Verbose: set listchars=nbsp:¬,eol:¶,extends:»,precedes:«,trail:•
 set listchars=nbsp:¬,extends:»,precedes:«,trail:•
 
+" Open NERDTree automatically when vim starts
+" autocmd VimEnter * NERDTree
+
+" Show hidden files in NERDTree
+let NERDTreeShowHidden=1
+
+" Set NERDTree as the default file explorer
+let g:nerdtree_tabs_focus_on_files = 1
+let g:nerdtree_quit_on_open = 1
+
+" Map a shortcut to toggle NERDTree
+nnoremap <leader>t :NERDTreeToggle<CR>
+nnoremap <leader><leader> :NERDTreeFind<CR>
+
+nnoremap <C-k> :silent wa \| :Git add -u\| Git commit -q -a<CR>
+nnoremap <C-t> :Git pull --rebase<CR>
 " =============================================================================
 " # Keyboard shortcuts
 " =============================================================================
 " ; as :
 nnoremap ; :
-
-" Ctrl+j and Ctrl+k as Esc
-" Ctrl-j is a little awkward unfortunately:
-" https://github.com/neovim/neovim/issues/5916
-" So we also map Ctrl+k
-nnoremap <C-j> <Esc>
-inoremap <C-j> <Esc>
-vnoremap <C-j> <Esc>
-snoremap <C-j> <Esc>
-xnoremap <C-j> <Esc>
-cnoremap <C-j> <C-c>
-onoremap <C-j> <Esc>
-lnoremap <C-j> <Esc>
-tnoremap <C-j> <Esc>
-
-nnoremap <C-k> <Esc>
-inoremap <C-k> <Esc>
-vnoremap <C-k> <Esc>
-snoremap <C-k> <Esc>
-xnoremap <C-k> <Esc>
-cnoremap <C-k> <C-c>
-onoremap <C-k> <Esc>
-lnoremap <C-k> <Esc>
-tnoremap <C-k> <Esc>
 
 " Ctrl+h to stop searching
 vnoremap <C-h> :nohlsearch<cr>
@@ -435,7 +443,8 @@ noremap <leader>p :read !xsel --clipboard --output<cr>
 noremap <leader>c :w !xsel -ib<cr><cr>
 
 " <leader>s for Rg search
-noremap <leader>s :Rg
+nnoremap <leader>s :execute 'Rg '.input('Search for: ')<CR>
+
 let g:fzf_layout = { 'down': '~20%' }
 command! -bang -nargs=* Rg
   \ call fzf#vim#grep(
@@ -457,23 +466,22 @@ command! -bang -nargs=? -complete=dir Files
 " Open new file adjacent to current file
 nnoremap <leader>o :e <C-R>=expand("%:p:h") . "/" <CR>
 
+" Create a file in the same folder where currently open file is.
+nnoremap <leader>n :execute 'edit ' . expand('%:h') . '/' . fnameescape(input('New file name: '))<CR>
+
 " Left and right can switch buffers
 nnoremap <left> :bp<CR>
 nnoremap <right> :bn<CR>
-nnoremap <leader>d :bd<CR>
 
 " Move by line
 nnoremap j gj
 nnoremap k gk
 
-" <leader><leader> toggles between buffers
-nnoremap <leader><leader> <c-^>
-
 " <leader>, shows/hides hidden characters
 nnoremap <leader>, :set invlist<cr>
 
 " <leader>q shows stats
-nnoremap <leader>q g<c-g>
+" nnoremap <leader>q g<c-g>
 
 " Keymap for replacing up to next _ or -
 noremap <leader>m ct_
@@ -482,6 +490,22 @@ noremap <leader>m ct_
 map <F1> <Esc>
 imap <F1> <Esc>
 
+" Window-related mappings using the leader key
+nnoremap <leader>w <C-w>w    " Switch to the next window
+nnoremap <leader>h <C-w>h    " Move cursor to the left window
+nnoremap <leader>j <C-w>j    " Move cursor to the window below
+nnoremap <leader>k <C-w>k    " Move cursor to the window above
+nnoremap <leader>l <C-w>l    " Move cursor to the right window
+" Window-splitting mappings using the leader key
+nnoremap <leader>v <C-w>v    " Split window vertically
+nnoremap <C-c> <C-w>q	     " Close current window
+nnoremap <leader>c :only<CR> " Close all windows except current
+
+" Window movement mappings using the leader key
+nnoremap <leader>H <C-w>H    " Move current window to the far left
+nnoremap <leader>J <C-w>J    " Move current window to the very bottom
+nnoremap <leader>K <C-w>K    " Move current window to the very top
+nnoremap <leader>L <C-w>L    " Move current window to the far right
 
 " =============================================================================
 " # Autocommands
@@ -500,10 +524,6 @@ if has("autocmd")
   au BufReadPost * if expand('%:p') !~# '\m/\.git/' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
 
-" Follow Rust code style rules
-au Filetype rust source ~/.config/nvim/scripts/spacetab.vim
-"au Filetype rust set colorcolumn=100
-
 " Help filetype detection
 autocmd BufRead *.plot set filetype=gnuplot
 autocmd BufRead *.md set filetype=markdown
@@ -511,9 +531,6 @@ autocmd BufRead *.lds set filetype=ld
 autocmd BufRead *.tex set filetype=tex
 autocmd BufRead *.trm set filetype=c
 autocmd BufRead *.xlsx.axlsx set filetype=ruby
-
-" Script plugins
-autocmd Filetype html,xml,xsl,php source ~/.config/nvim/scripts/closetag.vim
 
 " =============================================================================
 " # Footer
