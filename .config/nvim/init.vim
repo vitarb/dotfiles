@@ -33,6 +33,7 @@ Plug 'justinmk/vim-sneak'
 
 " GUI enhancements
 Plug 'itchyny/lightline.vim'
+Plug 'mengelbrecht/lightline-bufferline'
 Plug 'andymass/vim-matchup'
 
 " Fuzzy finder
@@ -110,6 +111,7 @@ lua << END
 local cmp = require'cmp'
 
 local lspconfig = require'lspconfig'
+
 cmp.setup({
   snippet = {
     -- REQUIRED by nvim-cmp. get rid of it once we can
@@ -134,7 +136,6 @@ cmp.setup({
     ghost_text = true,
   },
 })
-
 -- Enable completing paths in :
 cmp.setup.cmdline(':', {
   sources = cmp.config.sources({
@@ -181,6 +182,20 @@ local on_attach = function(client, bufnr)
     },
   })
 end
+
+lspconfig.clangd.setup{
+    on_attach = on_attach,
+    cmd = {'clangd', '--background-index', '--clang-tidy', '--completion-style=bundled'},
+    clangd = {
+        arguments = {
+          '-isystem', '/usr/include/x86_64-linux-gnu/bits',
+          '-isystem', '/usr/include/x86_64-linux-gnu/gnu',
+          '-isystem', '/usr/lib/gcc/x86_64-linux-gnu/7/include',
+          '-isystem', '/usr/local/include',
+          '-isystem', '/usr/include',
+        },
+    }
+}
 
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 lspconfig.rust_analyzer.setup {
@@ -229,23 +244,26 @@ let g:secure_modelines_allowed_items = [
                 \ "colorcolumn"
                 \ ]
 
-" Lightline
+" List of available themes:
+" https://github.com/itchyny/lightline.vim/blob/master/colorscheme.md
 let g:lightline = {
+      \ 'colorscheme': 'wombat',
       \ 'active': {
-      \   'left': [ [ 'mode', 'paste' ],
-      \             [ 'readonly', 'filename', 'modified' ] ],
-      \   'right': [ [ 'lineinfo' ],
-      \              [ 'percent' ],
-      \              [ 'fileencoding', 'filetype' ] ],
+      \   'left': [ [ 'mode', 'paste' ], [ 'readonly', 'filename', 'modified' ] ]
       \ },
-      \ 'component_function': {
-      \   'filename': 'LightlineFilename'
+      \ 'tabline': {
+      \   'left': [ ['buffers'] ],
+      \   'right': [ ]
       \ },
+      \ 'component_expand': {
+      \   'buffers': 'lightline#bufferline#buffers'
+      \ },
+      \ 'component_type': {
+      \   'buffers': 'tabsel'
       \ }
-function! LightlineFilename()
-  return expand('%:t') !=# '' ? @% : '[No Name]'
-endfunction
+      \ }
 
+set showtabline=2
 " from http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
 if executable('ag')
 	set grepprg=ag\ --nogroup\ --nocolor
@@ -306,7 +324,6 @@ let g:go_play_open_browser = 0
 let g:go_fmt_fail_silently = 1
 let g:go_fmt_command = "goimports"
 let g:go_bin_path = expand("~/dev/go/bin")
-
 " =============================================================================
 " # Editor settings
 " =============================================================================
@@ -344,10 +361,10 @@ set wildmode=list:longest
 set wildignore=.hg,.svn,*~,*.png,*.jpg,*.gif,*.settings,Thumbs.db,*.min.js,*.swp,publish/*,intermediate/*,*.o,*.hi,Zend,vendor
 
 " Use wide tabs
-set shiftwidth=8
-set softtabstop=8
-set tabstop=8
-set noexpandtab
+set shiftwidth=4
+set softtabstop=4
+set tabstop=4
+set expandtab
 
 " Wrapping options
 set formatoptions=tc " wrap text and comments using textwidth
@@ -445,7 +462,9 @@ noremap <leader>c :w !xsel -ib<cr><cr>
 " <leader>s for Rg search
 nnoremap <leader>s :execute 'Rg '.input('Search for: ')<CR>
 
-let g:fzf_layout = { 'down': '~20%' }
+" let g:fzf_layout = { 'down': '~20%' }
+" let g:fzf_layout = { 'window': { 'width': 100, 'height': 30 } }
+
 command! -bang -nargs=* Rg
   \ call fzf#vim#grep(
   \   'rg --column --line-number --no-heading --color=always '.shellescape(<q-args>), 1,
