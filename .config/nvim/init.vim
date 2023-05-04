@@ -49,6 +49,7 @@ Plug 'hrsh7th/cmp-buffer', {'branch': 'main'}
 Plug 'hrsh7th/cmp-path', {'branch': 'main'}
 Plug 'hrsh7th/nvim-cmp', {'branch': 'main'}
 Plug 'ray-x/lsp_signature.nvim'
+Plug 'simrat39/symbols-outline.nvim'
 
 " Only because nvim-cmp _requires_ snippets
 Plug 'hrsh7th/cmp-vsnip', {'branch': 'main'}
@@ -93,7 +94,7 @@ if (match($TERM, "-256color") != -1) && (match($TERM, "screen-256color") == -1)
   " screen does not (yet) support truecolor
   set termguicolors
 endif
-syntax on
+syntax enable 
 hi Normal ctermbg=NONE
 
 " Customize the highlight a bit.
@@ -105,7 +106,6 @@ hi Normal ctermbg=NONE
 " them less glaring. But alas
 " https://github.com/nvim-lua/lsp_extensions.nvim/issues/21
 " call Base16hi("CocHintSign", g:base16_gui03, "", g:base16_cterm03, "", "", "")
-
 " LSP configuration
 lua << END
 local cmp = require'cmp'
@@ -136,6 +136,10 @@ cmp.setup({
     ghost_text = true,
   },
 })
+
+-- Setup outline
+require("symbols-outline").setup()
+
 -- Enable completing paths in :
 cmp.setup.cmdline(':', {
   sources = cmp.config.sources({
@@ -157,21 +161,21 @@ local on_attach = function(client, bufnr)
   -- See `:help vim.lsp.*` for documentation on any of the below functions
   buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
   buf_set_keymap('n', '<C-B>', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  buf_set_keymap('n', '<leader>i', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
   buf_set_keymap('n', '<C-M-I>', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  buf_set_keymap('n', 'gu', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
   buf_set_keymap('n', '<C-M-B>', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  buf_set_keymap('n', '<F7>', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
   buf_set_keymap('n', '<C-q>', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
   buf_set_keymap('n', '<C-p>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  buf_set_keymap('n', '<leader>d', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  buf_set_keymap('n', 'gt', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
   buf_set_keymap('n', '<C-r>', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   buf_set_keymap('n', '<F6>', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   buf_set_keymap('n', '<C-space>', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   buf_set_keymap('n', '<M-CR>', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
   buf_set_keymap('n', '<C-M-l>', '<cmd>lua vim.lsp.buf.format()<CR>', opts)
   -- buf_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
-  -- buf_set_keymap('n', '<C-k>', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
-  -- buf_set_keymap('n', '<C-j>', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+  buf_set_keymap('n', 'gp', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+  buf_set_keymap('n', 'gn', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
   -- buf_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.set_loclist()<CR>', opts)
 
   -- Get signatures (and _only_ signatures) when in argument lists.
@@ -183,18 +187,10 @@ local on_attach = function(client, bufnr)
   })
 end
 
+-- set C_INCLUDE_PATH env var to supply additional system headers
 lspconfig.clangd.setup{
     on_attach = on_attach,
-    cmd = {'clangd', '--background-index', '--clang-tidy', '--completion-style=bundled'},
-    clangd = {
-        arguments = {
-          '-isystem', '/usr/include/x86_64-linux-gnu/bits',
-          '-isystem', '/usr/include/x86_64-linux-gnu/gnu',
-          '-isystem', '/usr/lib/gcc/x86_64-linux-gnu/7/include',
-          '-isystem', '/usr/local/include',
-          '-isystem', '/usr/include',
-        },
-    }
+    cmd = {'clangd', '--background-index', '--clang-tidy', '--completion-style=bundled'}
 }
 
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
@@ -333,6 +329,7 @@ set timeoutlen=300 " http://stackoverflow.com/questions/2158516/delay-before-o-o
 set encoding=utf-8
 set scrolloff=2
 set noshowmode
+set noshowcmd
 set hidden
 set nowrap
 set nojoinspaces
@@ -434,6 +431,9 @@ nnoremap <leader><leader> :NERDTreeFind<CR>
 
 nnoremap <C-k> :silent wa \| :Git add -u\| Git commit -q -a<CR>
 nnoremap <C-t> :Git pull --rebase<CR>
+
+nnoremap <Leader>o :SymbolsOutline<CR>
+nnoremap <F12> :SymbolsOutline<CR>
 " =============================================================================
 " # Keyboard shortcuts
 " =============================================================================
