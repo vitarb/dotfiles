@@ -2,21 +2,6 @@
 set shell=/bin/bash
 let mapleader = "\'"
 
-" Map F keys, press C-v and corresponding F key in your terminal to ensure
-" that mappings are correct.
-set <F1>=<F1>
-set <F2>=<F2>
-set <F3>=<F3>
-set <F4>=<F4>
-set <F5>=<F5>
-set <F6>=<F6>
-set <F7>=<F7>
-set <F8>=<F8>
-set <F9>=<F9>
-set <F10>=<F10>
-set <F11>=<F11>
-set <F12>=<F12>
-
 " =============================================================================
 " # PLUGINS
 " =============================================================================
@@ -64,8 +49,9 @@ Plug 'rhysd/vim-clang-format'
 Plug 'dag/vim-fish'
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
-Plug 'morhetz/gruvbox'
-
+"Plug 'morhetz/gruvbox'
+"Plug 'Mofiqul/dracula.nvim'
+Plug 'navarasu/onedark.nvim'
 " Sudo write
 Plug 'lambdalisue/suda.vim'
 " Project tree
@@ -83,8 +69,8 @@ if has('nvim')
 end
 
 "set background=light
-set background=dark
-autocmd vimenter * ++nested colorscheme gruvbox
+"set background=dark
+"autocmd vimenter * ++nested colorscheme gruvbox
 
 " deal with colors
 if !has('gui_running')
@@ -146,6 +132,12 @@ cmp.setup.cmdline(':', {
     { name = 'path' }
   })
 })
+
+-- Setup colorscheme
+require('onedark').setup {
+    style = 'darker'
+}
+require('onedark').load()
 
 -- Setup lspconfig.
 local on_attach = function(client, bufnr)
