@@ -49,9 +49,7 @@ Plug 'rhysd/vim-clang-format'
 Plug 'dag/vim-fish'
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
-"Plug 'morhetz/gruvbox'
-"Plug 'Mofiqul/dracula.nvim'
-Plug 'navarasu/onedark.nvim'
+Plug 'ellisonleao/gruvbox.nvim'
 " Sudo write
 Plug 'lambdalisue/suda.vim'
 " Project tree
@@ -67,10 +65,6 @@ if has('nvim')
     set inccommand=nosplit
     noremap <C-x> :confirm qall<CR>
 end
-
-"set background=light
-"set background=dark
-"autocmd vimenter * ++nested colorscheme gruvbox
 
 " deal with colors
 if !has('gui_running')
@@ -134,10 +128,8 @@ cmp.setup.cmdline(':', {
 })
 
 -- Setup colorscheme
-require('onedark').setup {
-    style = 'darker'
-}
-require('onedark').load()
+vim.o.background = "dark" -- or "light" for light mode
+vim.cmd([[colorscheme gruvbox]])
 
 -- Setup lspconfig.
 local on_attach = function(client, bufnr)
