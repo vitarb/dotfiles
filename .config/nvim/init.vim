@@ -21,6 +21,9 @@ Plug 'itchyny/lightline.vim'
 Plug 'mengelbrecht/lightline-bufferline'
 Plug 'andymass/vim-matchup'
 
+" Navigation
+Plug 'phaazon/hop.nvim'
+
 " Fuzzy finder
 Plug 'airblade/vim-rooter'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
@@ -58,6 +61,9 @@ Plug 'preservim/nerdtree'
 Plug 'airblade/vim-gitgutter'
 Plug 'tpope/vim-fugitive'
 
+" Nicer notifications
+Plug 'rcarriga/nvim-notify'
+
 call plug#end()
 
 if has('nvim')
@@ -91,6 +97,14 @@ lua << END
 local cmp = require'cmp'
 
 local lspconfig = require'lspconfig'
+
+local hop = require'hop'
+
+vim.notify = require("notify")
+
+hop.setup{
+  quit_key = '<SPC>',
+}
 
 cmp.setup({
   snippet = {
@@ -268,6 +282,10 @@ let g:latex_fold_sections = []
 map <C-n> :Files<CR>
 nmap <C-e> :Buffers<CR>
 
+" Hop mappings
+nnoremap f :HopWord<CR>
+nnoremap <C-g> :HopLine<CR>
+
 " Rust
 nnoremap <C-A-F> :RustFmt<CR>
 
@@ -413,11 +431,16 @@ let g:nerdtree_quit_on_open = 1
 nnoremap <leader>t :NERDTreeToggle<CR>
 nnoremap <leader><leader> :NERDTreeFind<CR>
 
+" Git command mappings
 nnoremap <C-k> :silent wa \| :Git add -u\| Git commit -q -a<CR>
 nnoremap <C-t> :Git pull --rebase<CR>
 
+" Open file structure outline
 nnoremap <Leader>o :SymbolsOutline<CR>
 nnoremap <F12> :SymbolsOutline<CR>
+
+" Select word under cursor
+nnoremap <C-w> viw
 " =============================================================================
 " # Keyboard shortcuts
 " =============================================================================
@@ -427,11 +450,6 @@ nnoremap ; :
 " Ctrl+h to stop searching
 vnoremap <C-h> :nohlsearch<cr>
 nnoremap <C-h> :nohlsearch<cr>
-
-" Suspend with Ctrl+f
-inoremap <C-f> :sus<cr>
-vnoremap <C-f> :sus<cr>
-nnoremap <C-f> :sus<cr>
 
 " Jump to start and end of line using the home row keys
 map H ^
@@ -444,7 +462,7 @@ noremap <leader>p :read !xsel --clipboard --output<cr>
 noremap <leader>c :w !xsel -ib<cr><cr>
 
 " <leader>s for Rg search
-nnoremap <leader>s :execute 'Rg '.input('Search for: ')<CR>
+nnoremap <silent> <C-f> :lua local search_term = vim.fn.input('Search for: ') if search_term ~= '' then vim.fn.execute('Rg ' .. search_term) end<CR>
 
 " let g:fzf_layout = { 'down': '~20%' }
 " let g:fzf_layout = { 'window': { 'width': 100, 'height': 30 } }
